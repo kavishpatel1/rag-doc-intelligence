@@ -39,13 +39,10 @@ def clean_extracted_text(text: str) -> str:
 
 
 def is_garbage_page(text: str) -> bool:
-    # Page is garbage if same sentence repeats more than 3 times
-    # or if it contains EOS/pad tokens (attention visualization pages)
     if text.count("<EOS>") > 2:
         return True
     if text.count("<pad>") > 2:
         return True
-    # Check if any single line repeats more than 3 times
     lines = [l.strip() for l in text.split("\n") if l.strip()]
     for line in lines:
         if len(line) > 10 and lines.count(line) > 3:
@@ -136,6 +133,33 @@ def embed_and_store(chunks: list[dict], collection) -> int:
         )
 
     return len(chunks)
+
+
+
+def delete_document(doc_name: str) -> dict:
+    """
+    Removes all chunks belonging to a specific document from ChromaDB.
+    """
+    collection = get_chroma_collection()
+    
+    result = collection.get(
+        where={"doc_name": doc_name},
+        include=["metadatas"]
+    )
+    
+    if not result["ids"]:
+        return {
+            "status": "error",
+            "message": f"No document found with name '{doc_name}'"
+        }
+    
+    collection.delete(ids=result["ids"])
+    
+    return {
+        "status": "success",
+        "doc_name": doc_name,
+        "chunks_deleted": len(result["ids"])
+    }
 
 
 def ingest_pdf(pdf_path: str, original_filename: str = None) -> dict:

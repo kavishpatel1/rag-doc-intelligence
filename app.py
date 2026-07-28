@@ -46,7 +46,7 @@ def sync_ingested_docs():
     and restore the ingested_docs list in session state.
     """
     if st.session_state.ingested_docs:
-        return  # already populated, no need to sync
+        return
     
     try:
         collection = get_chroma_collection()
@@ -58,7 +58,7 @@ def sync_ingested_docs():
             ))
             st.session_state.ingested_docs = sorted(doc_names)
     except Exception:
-        pass  # collection doesn't exist yet — fine, first run
+        pass  
 
 sync_ingested_docs()
 
@@ -112,8 +112,28 @@ with st.sidebar:
     if st.session_state.ingested_docs:
         st.markdown("---")
         st.markdown("**Loaded documents:**")
+        
         for doc in st.session_state.ingested_docs:
-            st.markdown(f"- 📄 `{doc}`")
+            col1, col2 = st.columns([4, 1])
+            
+            with col1:
+                st.markdown(f"📄 `{doc}`")
+            
+            with col2:
+                if st.button("🗑️", key=f"delete_{doc}", help=f"Remove {doc}"):
+                    with st.spinner(f"Removing {doc}..."):
+                        from ingestion import delete_document
+                        result = delete_document(doc)
+                    
+                    if result["status"] == "success":
+                        st.session_state.ingested_docs.remove(doc)
+                        st.success(
+                            f"Removed {doc} "
+                            f"({result['chunks_deleted']} chunks deleted)"
+                        )
+                        st.rerun()
+                    else:
+                        st.error(result["message"])
 
     st.markdown("---")
     if st.button("Clear Conversation", use_container_width=True):
