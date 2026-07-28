@@ -9,8 +9,8 @@ load_dotenv()
 
 CHROMA_PATH = "chroma_store"
 COLLECTION_NAME = "documents"
-TOP_K_SEMANTIC = 20
-TOP_K_BM25 = 20
+TOP_K_SEMANTIC = 30 
+TOP_K_BM25 = 30     
 RRF_K = 60
 
 def get_collection():

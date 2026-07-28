@@ -18,6 +18,7 @@ Rules:
 3. If different chunks provide conflicting information, note the conflict and cite both.
 4. If the context does not contain enough information to answer, say so clearly.
 5. Keep answers concise and well-structured.
+6. Do NOT use any knowledge from your training data. If the answer is not explicitly in the context, say "The provided documents do not contain enough information to answer this question."
 """
 
 
